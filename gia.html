@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PM‑AJAY GIA · AI‑Driven Welfare Command</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Framer Motion like animations via CSS -->
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #070c14; transition: background 0.3s, color 0.2s; }
+        .glass {
+            background: rgba(12, 22, 35, 0.75);
+            backdrop-filter: blur(18px) saturate(200%);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .glass-card {
+            background: rgba(18, 28, 44, 0.65);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 25px 40px -15px rgba(0,0,0,0.6), 0 0 0 1px rgba(80, 160, 255, 0.05);
+            transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+        }
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 35px 45px -18px rgba(0,0,0,0.8); border-color: rgba(100,180,255,0.2); }
+        .progress-step .step-circle { transition: all 0.2s; }
+        .progress-step.active .step-circle { background: #3b82f6; border-color: #3b82f6; color: white; box-shadow: 0 0 14px #3b82f6; }
+        .progress-step.completed .step-circle { background: #10b981; border-color: #10b981; }
+        .typing-dot { animation: blink 1.4s infinite both; }
+        @keyframes blink { 0%,100%{opacity:0.2} 50%{opacity:1} }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f1a26; }
+        ::-webkit-scrollbar-thumb { background: #2a3f5a; border-radius: 10px; }
+        .map-placeholder { background: radial-gradient(circle at 30% 30%, #1a3a5c, #0a1420); position: relative; }
+        .fraud-alert-item { border-left: 5px solid #ef4444; background: rgba(239,68,68,0.06); }
+        .light-mode body { background: #f1f5f9; }
+        .light-mode .glass, .light-mode .glass-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border-color: rgba(0,0,0,0.05); color: #0f172a; }
+        .light-mode .text-gray-200, .light-mode .text-gray-300, .light-mode .text-gray-400 { color: #1e293b; }
+        .skeleton { background: linear-gradient(90deg, #1e2e42 25%, #2d445e 50%, #1e2e42 75%); background-size: 200% 100%; animation: shimmer 1.6s infinite; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .animate-in { animation: fadeSlide 0.3s ease-out; }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="text-gray-200 antialiased">
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-[#03070e]/95 backdrop-blur-xl transition-all duration-700">
+    <div class="glass-card w-full max-w-xl p-10 rounded-3xl shadow-2xl border-white/5">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-700 to-indigo-900 shadow-2xl mb-5">
+                <i class="fas fa-landmark text-5xl text-white"></i>
+            </div>
+            <h2 class="text-5xl font-bold bg-gradient-to-r from-blue-300 via-indigo-200 to-white bg-clip-text text-transparent">PM‑AJAY GIA</h2>
+            <p class="text-gray-400 text-sm mt-2 uppercase tracking-widest">AI‑first welfare · transparency redefined</p>
+        </div>
+        <p class="text-center text-gray-300 mb-6 text-sm font-medium">Select your access portal</p>
+        <div class="grid grid-cols-2 gap-6">
+            <button id="loginAsBeneficiary" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-900/30 to-teal-900/30 border border-emerald-500/30 p-8 hover:border-emerald-400 transition-all duration-300">
+                <i class="fas fa-user-check text-5xl text-emerald-300 mb-5"></i>
+                <h3 class="font-semibold text-2xl text-white">Beneficiary</h3>
+                <p class="text-xs text-gray-400 mt-2">Apply & track schemes</p>
+                <div class="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition"></div>
+            </button>
+            <button id="loginAsAdmin" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-900/30 to-purple-900/30 border border-indigo-500/30 p-8 hover:border-indigo-400 transition-all duration-300">
+                <i class="fas fa-shield-hal text-5xl text-indigo-300 mb-5"></i>
+                <h3 class="font-semibold text-2xl text-white">Administrator</h3>
+                <p class="text-xs text-gray-400 mt-2">Officer dashboard</p>
+                <div class="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition"></div>
+            </button>
+        </div>
+        <div class="mt-6 flex justify-center">
+            <button id="toggleThemeLogin" class="text-xs text-gray-400 hover:text-white flex items-center gap-2 px-3 py-1 rounded-full border border-white/10"><i class="far fa-moon"></i> Toggle theme</button>
+        </div>
+        <p class="text-center text-gray-500 text-[10px] mt-6">Simulated environment · AI responses mocked · no real data</p>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appContainer" class="hidden flex h-screen overflow-hidden">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="w-80 glass border-r border-white/5 flex flex-col transition-all duration-300 relative z-20">
+        <div class="p-5 flex items-center gap-3 border-b border-white/5">
+            <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center shadow-lg"><i class="fas fa-robot text-blue-200 text-xl"></i></div>
+            <span class="font-bold text-2xl tracking-tight bg-gradient-to-r from-blue-200 to-white bg-clip-text text-transparent">PM‑AJAY</span>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4 px-3" id="sidebarMenu"></div>
+        <div class="p-4 border-t border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center shadow"><i class="fas fa-user-circle text-xl"></i></div>
+                <div><p id="sidebarUserRole" class="text-sm font-medium">Beneficiary</p><p class="text-xs text-gray-400" id="sidebarUserName">Ramesh Kumar</p></div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN PANEL -->
+    <main class="flex-1 flex flex-col overflow-hidden relative">
+        <header class="glass h-16 px-6 flex items-center justify-between border-b border-white/5 z-10">
+            <div class="flex items-center gap-4">
+                <button id="sidebarToggle" class="text-gray-300 hover:text-white transition"><i class="fas fa-bars text-xl"></i></button>
+                <h2 class="font-semibold text-xl" id="pageTitle">Dashboard</h2>
+            </div>
+            <div class="flex items-center gap-5">
+                <button id="themeToggle" class="text-gray-300 hover:text-white"><i class="far fa-moon text-xl"></i></button>
+                <button class="relative"><i class="far fa-bell text-xl text-gray-300 hover:text-white"></i><span class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-[10px] flex items-center justify-center">3</span></button>
+                <div class="h-9 w-9 rounded-full bg-gradient-to-tr from-blue-400 to-indigo-600 border-2 border-white/20"></div>
+            </div>
+        </header>
+
+        <div id="contentArea" class="flex-1 overflow-auto p-6 scroll-smooth animate-in">
+            <!-- injected -->
+        </div>
+    </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden glass-card px-5 py-3 rounded-xl text-sm shadow-2xl border-l-4 border-blue-500 max-w-sm"></div>
+
+<script>
+    (function(){
+        "use strict";
+
+        // ---------- STATE (simulated backend) ----------
+        let currentRole = null; 
+        let currentPage = 'dashboard';
+        let sidebarCollapsed = false;
+        let darkMode = true;
+        const mockUser = { 
+            beneficiary: { name: 'Ramesh Kumar', id: 'BEN789', category: 'SC', income: 28000, village: 'Dharampur', aadhar: '****1234' },
+            admin: { name: 'Anjali Sharma', id: 'ADM42', dept: 'Welfare' }
+        };
+
+        // Data stores
+        let applications = [
+            { id: 'APP101', scheme: 'PM-AJAY Hostel', status: 'Under Review', submitted: '2026-04-10', score: 82, steps: ['Submitted', 'Under Review'] },
+            { id: 'APP102', scheme: 'Skill Development', status: 'Approved', submitted: '2026-03-22', score: 91, steps: ['Submitted', 'Under Review', 'Approved'] }
+        ];
+        let beneficiaries = [
+            { id: 'B001', name: 'Ramesh Kumar', village: 'Dharampur', income: 28000, status: 'Approved', risk: 'low', aadhar: '****1234' },
+            { id: 'B002', name: 'Suman Devi', village: 'Belgachi', income: 18000, status: 'Pending', risk: 'medium', aadhar: '****5678' },
+            { id: 'B003', name: 'Vikram Singh', village: 'Dharampur', income: 32000, status: 'Rejected', risk: 'high', duplicate: true },
+            { id: 'B004', name: 'Geeta Bai', village: 'Ramnagar', income: 22000, status: 'Approved', risk: 'low' },
+            { id: 'B005', name: 'Mohan Lal', village: 'Belgachi', income: 45000, status: 'Pending', risk: 'high', anomaly: 'Income exceeds limit' }
+        ];
+        let fundData = { allocated: 5200000, used: 4180000 };
+
+        // DOM
+        const loginScreen = document.getElementById('loginScreen');
+        const appContainer = document.getElementById('appContainer');
+        const sidebarMenu = document.getElementById('sidebarMenu');
+        const pageTitle = document.getElementById('pageTitle');
+        const contentArea = document.getElementById('contentArea');
+        const sidebarUserRole = document.getElementById('sidebarUserRole');
+        const sidebarUserName = document.getElementById('sidebarUserName');
+        const toastEl = document.getElementById('toast');
+
+        function showToast(msg, type = 'info') {
+            toastEl.textContent = msg;
+            toastEl.className = 'fixed bottom-6 right-6 z-50 glass-card px-5 py-3 rounded-xl text-sm shadow-2xl border-l-4 max-w-sm ';
+            toastEl.classList.add(type === 'success' ? 'border-emerald-500' : (type==='error'?'border-red-500':'border-blue-500'));
+            toastEl.classList.remove('hidden');
+            setTimeout(() => toastEl.classList.add('hidden'), 3200);
+        }
+
+        function toggleTheme() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('light-mode', !darkMode);
+            const icons = document.querySelectorAll('#themeToggle i, #toggleThemeLogin i');
+            icons.forEach(icon => icon.className = darkMode ? 'far fa-moon' : 'far fa-sun');
+            localStorage.setItem('theme', darkMode?'dark':'light');
+        }
+
+        // ---------- SIDEBAR & NAVIGATION ----------
+        function renderSidebar() {
+            if (!currentRole) return;
+            const isBen = currentRole === 'beneficiary';
+            const menuItems = isBen ? [
+                { icon: 'fa-chart-pie', label: 'Dashboard', page: 'dashboard' },
+                { icon: 'fa-file-signature', label: 'Apply Scheme', page: 'apply' },
+                { icon: 'fa-timeline', label: 'Track', page: 'track' },
+                { icon: 'fa-briefcase', label: 'Jobs', page: 'jobs' },
+                { icon: 'fa-newspaper', label: 'News', page: 'news' },
+                { icon: 'fa-robot', label: 'AI Assistant', page: 'chat' },
+            ] : [
+                { icon: 'fa-gauge-high', label: 'Dashboard', page: 'dashboard' },
+                { icon: 'fa-users', label: 'Beneficiaries', page: 'beneficiaries' },
+                { icon: 'fa-coins', label: 'Fund Tracking', page: 'funds' },
+                { icon: 'fa-shield-hal', label: 'Fraud Detection', page: 'fraud' },
+                { icon: 'fa-chart-line', label: 'Analytics', page: 'analytics' },
+                { icon: 'fa-map', label: 'Geo Map', page: 'map' },
+            ];
+            sidebarMenu.innerHTML = menuItems.map(item => `
+                <div class="sidebar-icon flex items-center gap-3 px-4 py-3 rounded-xl mb-1.5 cursor-pointer transition-all ${currentPage === item.page ? 'bg-blue-600/20 text-blue-200 border-l-2 border-blue-400 shadow-inner' : 'hover:bg-white/5 text-gray-300'}" data-page="${item.page}">
+                    <i class="fas ${item.icon} w-5 text-lg"></i><span class="font-medium">${item.label}</span>
+                </div>
+            `).join('');
+            document.querySelectorAll('[data-page]').forEach(el => el.addEventListener('click', (e) => navigateTo(el.dataset.page)));
+            sidebarUserRole.textContent = isBen ? 'Beneficiary' : 'Administrator';
+            sidebarUserName.textContent = isBen ? mockUser.beneficiary.name : mockUser.admin.name;
+        }
+
+        function navigateTo(page) {
+            currentPage = page;
+            pageTitle.textContent = page.charAt(0).toUpperCase() + page.slice(1);
+            renderSidebar();
+            renderContent();
+        }
+
+        // ---------- CONTENT RENDERERS ----------
+        function renderContent() {
+            if (currentRole === 'beneficiary') renderBeneficiaryContent();
+            else renderAdminContent();
+        }
+
+        // ---------- BENEFICIARY ADVANCED ----------
+        function renderBeneficiaryContent() {
+            let html = '';
+            const score = 82; 
+            if (currentPage === 'dashboard') {
+                html = `
+                    <div class="grid lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="glass-card p-6 rounded-2xl hover-lift">
+                                <div class="flex justify-between"><h3 class="text-xl font-semibold flex items-center gap-2"><i class="fas fa-brain text-blue-400"></i>AI Eligibility Score</h3><span class="bg-blue-500/20 px-3 py-1 rounded-full text-xs">Real‑time</span></div>
+                                <div class="flex items-end gap-4 mt-3"><span class="text-6xl font-bold text-blue-300">${score}</span><span class="text-gray-400 mb-1">/100 · Eligible</span></div>
+                                <div class="mt-3 p-3 bg-blue-900/20 rounded-lg border border-blue-500/20 text-sm"><i class="fas fa-lightbulb text-yellow-400 mr-2"></i>Income ₹28k, SC, rural → high alignment with PM-AJAY hostel & skill vouchers.</div>
+                                <div class="mt-4 text-xs text-gray-400 flex items-center"><i class="fas fa-sync-alt mr-1"></i>Updated just now</div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="glass-card p-5 rounded-xl hover-lift"><i class="fas fa-clock text-blue-300 mb-2 text-2xl"></i><p class="text-3xl font-bold">${applications.filter(a=>a.status!=='Approved').length}</p><p class="text-gray-400 text-sm">Active applications</p></div>
+                                <div class="glass-card p-5 rounded-xl hover-lift"><i class="fas fa-check-circle text-emerald-300 mb-2 text-2xl"></i><p class="text-3xl font-bold">${applications.filter(a=>a.status==='Approved').length}</p><p class="text-gray-400 text-sm">Approved</p></div>
+                            </div>
+                            <div class="glass-card p-5 rounded-xl"><h4 class="font-medium mb-3"><i class="far fa-newspaper mr-2"></i>Updates</h4><ul class="space-y-2 text-sm"><li class="border-l-2 border-blue-400 pl-3">• New hostel construction in Patna</li><li>• Skill training registration open</li></ul></div>
+                        </div>
+                        <div class="glass-card p-5 rounded-2xl"><h4 class="font-medium mb-4"><i class="fas fa-magic text-purple-300"></i> AI Recommendations</h4><div class="space-y-3">${['Data entry operator (Govt)','Web dev internship · ₹8k','Electrician training'].map(r=>`<div class="bg-white/5 p-3 rounded-lg border border-white/5 hover:bg-white/10 transition"><i class="fas fa-briefcase mr-2"></i>${r}</div>`).join('')}</div></div>
+                    </div>
+                `;
+            } else if (currentPage === 'apply') {
+                html = renderMultiStepForm();
+            } else if (currentPage === 'track') {
+                html = `<div class="max-w-3xl glass-card p-6 rounded-2xl"><h3 class="text-xl mb-4 flex items-center gap-2"><i class="fas fa-history"></i>Application Timeline</h3>${renderTimeline()}</div>`;
+            } else if (currentPage === 'jobs') {
+                html = renderJobsPage();
+            } else if (currentPage === 'news') {
+                html = renderNewsPage();
+            } else if (currentPage === 'chat') {
+                html = renderAIChat();
+            }
+            contentArea.innerHTML = html;
+            if (currentPage === 'apply') initFormSteps();
+            if (currentPage === 'chat') initChat();
+            if (currentPage === 'jobs') initJobFilters();
+        }
+
+        function renderMultiStepForm() {
+            return `<div class="max-w-4xl glass-card p-6 rounded-2xl"><div class="flex justify-between mb-8" id="progressSteps">${stepsHTML()}</div><div id="stepContent">${step1HTML()}</div><div class="flex justify-between mt-8"><button id="prevStep" class="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-40 transition" disabled>Previous</button><button id="nextStep" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:scale-105 transition shadow-lg">Next</button></div></div>`;
+        }
+        function stepsHTML(){ return ['Personal','Socio-economic','Documents','Review'].map((s,i)=>`<div class="progress-step flex items-center" data-step="${i}"><div class="step-circle w-8 h-8 rounded-full border-2 border-white/30 flex items-center justify-center text-sm font-medium">${i+1}</div><span class="ml-3 text-sm font-medium">${s}</span></div>`).join(''); }
+        function step1HTML(){ return `<div class="space-y-4"><label class="block text-sm">Full name <input id="fullName" value="${mockUser.beneficiary.name}" class="w-full bg-black/30 border border-white/10 rounded-xl p-3 mt-1"></label><label>DOB <input type="date" value="1998-05-12" class="w-full bg-black/30 border border-white/10 rounded-xl p-3 mt-1"></label><label>Gender <select class="w-full bg-black/30 border border-white/10 rounded-xl p-3"><option>Male</option></select></label></div>`; }
+        function initFormSteps(){
+            let step = 0; const steps = document.querySelectorAll('.progress-step');
+            const prev=document.getElementById('prevStep'), next=document.getElementById('nextStep');
+            const updateStepUI = () => {
+                steps.forEach((s,i)=>{ s.classList.toggle('active', i===step); s.classList.toggle('completed', i<step); });
+                prev.disabled = step===0;
+                next.textContent = step===3?'Submit':'Next';
+                if(step===0) document.getElementById('stepContent').innerHTML = step1HTML();
+                else if(step===1) document.getElementById('stepContent').innerHTML = `<div class="space-y-4"><label>Annual Income <input value="28000" class="w-full bg-black/30 border border-white/10 rounded-xl p-3"></label><label>Category <select class="w-full bg-black/30 p-3 rounded-xl"><option>SC</option></select></label></div>`;
+                else if(step===2) document.getElementById('stepContent').innerHTML = `<div class="border-2 border-dashed border-white/20 rounded-xl p-8 text-center"><i class="fas fa-cloud-upload-alt text-3xl mb-2"></i><p>Upload Aadhar, Income certificate</p><button class="mt-3 bg-blue-600/30 px-4 py-2 rounded-lg">Select files</button></div>`;
+                else document.getElementById('stepContent').innerHTML = `<div class="p-4 bg-emerald-900/20 rounded-xl">Review: ${mockUser.beneficiary.name}, SC, Income ₹28k. Ready to submit.</div>`;
+            };
+            next.onclick = ()=>{
+                if(step<3) { step++; updateStepUI(); }
+                else { 
+                    applications.push({ id:'APP'+(applications.length+100), scheme:'New Application', status:'Submitted', submitted: new Date().toISOString().slice(0,10), score:82, steps:['Submitted'] });
+                    showToast('Application submitted successfully!', 'success'); navigateTo('track'); 
+                }
+            };
+            prev.onclick = ()=>{ if(step>0){ step--; updateStepUI(); } };
+            updateStepUI();
+        }
+
+        function renderTimeline(){
+            return applications.map(a=>`<div class="border-l-2 ${a.status==='Approved'?'border-emerald-500':'border-blue-500'} pl-5 py-4"><div class="flex justify-between"><span class="font-medium text-lg">${a.scheme}</span><span class="text-xs bg-white/10 px-2 py-1 rounded">${a.status}</span></div><div class="flex text-sm text-gray-400 mt-2 gap-4">${a.steps.map(s=>`<span><i class="fas fa-circle text-[6px] mr-1"></i>${s}</span>`).join('')}</div></div>`).join('');
+        }
+
+        function renderJobsPage(){
+            return `<div class="space-y-5"><div class="flex gap-3"><input id="jobSearch" placeholder="Search jobs..." class="bg-black/20 border border-white/10 rounded-xl p-3 flex-1"><button class="bg-blue-600 px-5 rounded-xl"><i class="fas fa-search"></i></button></div><div id="jobList" class="grid md:grid-cols-2 gap-4">${getJobCards()}</div></div>`;
+        }
+        function getJobCards(filter=''){
+            const jobs = ['Govt Clerk - Dharampur (AI match 94%)','IT Intern - Skill India (89%)','Field Surveyor (82%)'];
+            return jobs.filter(j=>!filter||j.toLowerCase().includes(filter.toLowerCase())).map(j=>`<div class="glass-card p-5 rounded-xl hover-lift"><div class="flex justify-between"><h4 class="font-medium">${j.split('(')[0]}</h4><span class="bg-blue-500/20 text-blue-200 text-xs px-2 py-1 rounded-full">${j.match(/\(.*\)/)[0]}</span></div><p class="text-sm text-gray-400 mt-2">Stipend ₹8k-12k · Apply by May 10</p><button class="mt-3 text-sm bg-white/5 px-4 py-1.5 rounded-lg hover:bg-white/10"><i class="far fa-bookmark mr-1"></i>Save</button></div>`).join('');
+        }
+        function initJobFilters(){
+            const input = document.getElementById('jobSearch');
+            if(input) input.addEventListener('input', (e)=> document.getElementById('jobList').innerHTML = getJobCards(e.target.value));
+        }
+        function renderNewsPage(){
+            return `<div class="glass-card p-5"><h3 class="text-xl mb-3">📰 Latest Updates</h3><div class="space-y-3">${[{cat:'Government',title:'Cabinet approves ₹2000Cr for PM-AJAY'},{cat:'Tech',title:'Digital literacy mission launched'},{cat:'Economy',title:'Rural employment scheme extended'}].map(n=>`<div class="border-b border-white/5 pb-3"><span class="text-xs text-blue-300">${n.cat}</span><p class="font-medium">${n.title}</p></div>`).join('')}</div></div>`;
+        }
+        function renderAIChat(){
+            return `<div class="flex h-[75vh] glass-card rounded-2xl overflow-hidden"><div class="w-72 border-r border-white/5 p-3"><h4 class="mb-3 text-sm flex items-center"><i class="far fa-comments mr-2"></i>Chat history</h4><div class="text-xs text-gray-400 space-y-1"><div class="p-2 rounded hover:bg-white/5 cursor-pointer">Eligibility check</div></div></div><div class="flex-1 flex flex-col"><div class="flex-1 overflow-y-auto p-4 space-y-3" id="chatMessages"><div class="flex gap-3"><i class="fas fa-robot text-blue-300 mt-1"></i><div class="bg-white/5 p-4 rounded-2xl max-w-[80%]">Hello Ramesh! I'm your AI assistant. Ask about eligibility, jobs, or schemes.</div></div></div><div class="p-4 border-t border-white/5 flex gap-2"><input id="chatInput" placeholder="Ask anything..." class="flex-1 bg-black/30 rounded-xl p-3 border-0"><button id="sendChat" class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 rounded-xl"><i class="fas fa-paper-plane"></i></button></div></div></div>`;
+        }
+        function initChat(){
+            const input=document.getElementById('chatInput'), btn=document.getElementById('sendChat'), container=document.getElementById('chatMessages');
+            function addMessage(text, isUser=false){
+                const div=document.createElement('div'); div.className=`flex gap-3 ${isUser?'justify-end':''}`;
+                div.innerHTML= isUser? `<div class="bg-blue-600/30 p-4 rounded-2xl max-w-[75%]">${text}</div><i class="fas fa-user-circle text-xl"></i>` : `<i class="fas fa-robot text-blue-300"></i><div class="bg-white/5 p-4 rounded-2xl max-w-[75%]">${text}<span class="typing-dot ml-1">●</span></div>`;
+                container.appendChild(div); container.scrollTop=container.scrollHeight;
+            }
+            btn.onclick=()=>{ const val=input.value.trim(); if(!val)return; addMessage(val,true); input.value=''; 
+                setTimeout(()=>{ addMessage(`Based on profile (income ₹28k, SC), eligibility score is 82. You qualify for PM-AJAY hostel and skill vouchers.`); },700);
+            };
+        }
+
+        // ---------- ADMIN ADVANCED ----------
+        function renderAdminContent() {
+            let html = '';
+            if (currentPage === 'dashboard') {
+                html = `<div class="space-y-6"><div class="grid grid-cols-4 gap-5">${[{label:'Total beneficiaries',val:beneficiaries.length,icon:'users'},{label:'Pending approvals',val:beneficiaries.filter(b=>b.status==='Pending').length,icon:'clock',color:'yellow'},{label:'Approved',val:beneficiaries.filter(b=>b.status==='Approved').length,icon:'check-circle',color:'emerald'},{label:'Funds used',val:'₹'+(fundData.used/100000).toFixed(1)+'L',icon:'coins'}].map(c=>`<div class="glass-card p-5 rounded-xl"><i class="fas fa-${c.icon} text-2xl text-${c.color||'blue'}-300 mb-2"></i><p class="text-3xl font-bold">${c.val}</p><p class="text-gray-400 text-sm">${c.label}</p></div>`).join('')}</div>
+                <div class="grid grid-cols-2 gap-6"><div class="glass-card p-5"><canvas id="regionChart" height="200"></canvas></div><div class="glass-card p-5"><canvas id="trendChart" height="200"></canvas></div></div></div>`;
+                setTimeout(()=>{ renderCharts(); },60);
+            } else if (currentPage === 'beneficiaries') {
+                html = `<div class="glass-card p-5"><div class="flex justify-between mb-4"><h3 class="text-xl">Beneficiary Management</h3><input id="beneficiaryFilter" placeholder="Filter..." class="bg-black/20 border border-white/10 rounded-lg px-3 py-2"></div><div id="beneficiaryTableContainer">${beneficiaryTable()}</div></div>`;
+                setTimeout(()=> { attachBeneficiaryActions(); document.getElementById('beneficiaryFilter').addEventListener('input', (e)=> document.getElementById('beneficiaryTableContainer').innerHTML = beneficiaryTable(e.target.value)); },50);
+            } else if (currentPage === 'funds') {
+                const usedPercent = (fundData.used/fundData.allocated*100).toFixed(1);
+                html = `<div class="glass-card p-6"><h3 class="text-xl mb-4">💰 Fund Allocation vs Usage</h3><div class="flex items-end gap-8 h-40"><div class="relative w-32 bg-blue-500/40 h-28 rounded-t-lg"><span class="absolute -top-6 left-0">₹${(fundData.allocated/100000).toFixed(1)}L</span></div><div class="relative w-32 bg-emerald-500/40 h-20 rounded-t-lg"><span class="absolute -top-6">₹${(fundData.used/100000).toFixed(1)}L</span></div></div><p class="mt-4 text-sm">Remaining: ₹${((fundData.allocated-fundData.used)/100000).toFixed(1)}L · Utilization ${usedPercent}%</p><button id="updateFundsBtn" class="mt-4 bg-blue-600/30 px-4 py-2 rounded-lg text-sm">Simulate Disbursement</button></div>`;
+                setTimeout(()=> document.getElementById('updateFundsBtn').addEventListener('click', ()=>{ fundData.used = Math.min(fundData.allocated, fundData.used+200000); renderContent(); showToast('Funds updated', 'success'); }),50);
+            } else if (currentPage === 'fraud') {
+                html = `<div class="glass-card p-5"><h3 class="text-xl mb-3">🚨 Fraud Alerts</h3>${fraudAlerts()}</div>`;
+            } else if (currentPage === 'analytics') {
+                html = `<div class="glass-card p-5"><h3>Region-wise Analytics</h3><canvas id="analyticsChart" height="250"></canvas></div>`; setTimeout(()=>{ new Chart(document.getElementById('analyticsChart'),{type:'bar',data:{labels:['Dharampur','Belgachi','Ramnagar'],datasets:[{label:'Applications',data:[340,210,190]}]}}); },60);
+            } else if (currentPage === 'map') {
+                html = `<div class="glass-card p-5"><h3>🌍 Heatmap (Mapbox mock)</h3><div class="map-placeholder h-96 rounded-xl flex items-center justify-center text-gray-400 border border-white/10 relative overflow-hidden"><div class="absolute inset-0 bg-cover opacity-20" style="background-image:url('https://api.mapbox.com/styles/v1/mapbox/dark-v10/static/0,0,1/600x400?access_token=pk.mock')"></div><span class="relative z-10 text-lg"><i class="fas fa-map-marked-alt mr-2"></i>Interactive heatmap would render here</span></div></div>`;
+            }
+            contentArea.innerHTML = html;
+        }
+
+        function beneficiaryTable(filter=''){
+            const filtered = beneficiaries.filter(b=> !filter || b.name.toLowerCase().includes(filter.toLowerCase()) || b.village.toLowerCase().includes(filter.toLowerCase()));
+            return `<table class="w-full text-sm"><thead><tr class="border-b border-white/10 text-left"><th>Name</th><th>Village</th><th>Income</th><th>Status</th><th>Actions</th></tr></thead><tbody>${filtered.map(b=>`<tr class="border-b border-white/5"><td class="py-3">${b.name}</td><td>${b.village}</td><td>₹${b.income}</td><td><span class="px-2 py-1 rounded text-xs ${b.status==='Approved'?'bg-emerald-500/20 text-emerald-300':(b.status==='Pending'?'bg-yellow-500/20':'bg-red-500/20')}">${b.status}</span></td><td><button data-id="${b.id}" data-action="approve" class="text-blue-400 mr-3 hover:text-blue-300"><i class="fas fa-check-circle"></i></button><button data-id="${b.id}" data-action="reject" class="text-red-400 hover:text-red-300"><i class="fas fa-times-circle"></i></button><button class="text-gray-400"><i class="fas fa-eye"></i></button></td></tr>`).join('')}</tbody></table>`;
+        }
+        function attachBeneficiaryActions(){
+            document.querySelectorAll('[data-action]').forEach(btn=>{ btn.addEventListener('click', (e)=>{
+                const id = btn.dataset.id; const action = btn.dataset.action;
+                const beneficiary = beneficiaries.find(b=>b.id===id);
+                if(beneficiary) { beneficiary.status = action==='approve'?'Approved':'Rejected'; showToast(`${beneficiary.name} ${action}d`, 'success'); renderContent(); }
+            })});
+        }
+        function fraudAlerts(){
+            return beneficiaries.filter(b=>b.risk==='high'||b.duplicate||b.anomaly).map(b=>`<div class="fraud-alert-item p-4 rounded-lg mb-3 flex justify-between items-center"><div><i class="fas fa-exclamation-triangle text-red-400 mr-2"></i> ${b.name} (${b.village}) - ${b.duplicate?'Duplicate Aadhar':b.anomaly||'Income anomaly'}</div><button class="bg-red-500/20 hover:bg-red-500/30 px-3 py-1 rounded text-sm" data-resolve="${b.id}">Mark reviewed</button></div>`).join('') || '<p class="text-gray-400">No active fraud alerts.</p>';
+        }
+        function renderCharts(){
+            new Chart(document.getElementById('regionChart'),{type:'doughnut',data:{labels:['Dharampur','Belgachi','Ramnagar'],datasets:[{data:[540,340,290],backgroundColor:['#3b82f6','#10b981','#f59e0b']}]}});
+            new Chart(document.getElementById('trendChart'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr'],datasets:[{label:'Applications',data:[120,190,240,310],borderColor:'#3b82f6'}]}});
+        }
+
+        // ---------- LOGIN & INIT ----------
+        function setRole(role){
+            currentRole = role;
+            loginScreen.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            renderSidebar();
+            navigateTo('dashboard');
+            showToast(`Welcome, ${role==='beneficiary'?mockUser.beneficiary.name:mockUser.admin.name}`, 'success');
+        }
+
+        document.getElementById('loginAsBeneficiary').addEventListener('click', ()=> setRole('beneficiary'));
+        document.getElementById('loginAsAdmin').addEventListener('click', ()=> setRole('admin'));
+        document.getElementById('sidebarToggle').addEventListener('click', ()=>{
+            sidebarCollapsed = !sidebarCollapsed;
+            document.getElementById('sidebar').style.width = sidebarCollapsed ? '90px' : '320px';
+            document.querySelectorAll('#sidebarMenu span').forEach(s=> s.style.display = sidebarCollapsed?'none':'inline');
+        });
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        document.getElementById('toggleThemeLogin').addEventListener('click', toggleTheme);
+        
+        if(localStorage.getItem('theme')==='light') { darkMode=false; document.body.classList.add('light-mode'); document.querySelectorAll('#themeToggle i, #toggleThemeLogin i').forEach(i=>i.className='far fa-sun'); }
+
+        // Global delegation for fraud resolve
+        document.addEventListener('click', (e) => {
+            if(e.target.closest('[data-resolve]')) {
+                const id = e.target.closest('[data-resolve]').dataset.resolve;
+                const idx = beneficiaries.findIndex(b=>b.id===id);
+                if(idx!==-1) { beneficiaries.splice(idx,1); showToast('Alert resolved', 'success'); renderContent(); }
+            }
+        });
+    })();
+</script>
+</body>
+</html>
